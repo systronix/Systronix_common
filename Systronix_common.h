@@ -76,8 +76,6 @@
 //
 // Teensy port pin defines
 //
-// TODO: #if teensy 3.0, 3.1, 3.2, 3.5, 3.6 ...
-//
 
 enum {
 	_P0 = 0, _P1, _P2, _P3, _P4, _P5, _P6, _P7, _P8, _P9,			// teensy 3.2
@@ -90,19 +88,6 @@ enum {
 	};
 
 
-
-
-/* 
-#define	TOUCH			_P2		// display touch input; active low
-#define TE				_P5		// tear enable input; active high
-#define	WAIT			_P5		// display wait input; active low
-#define	DDS_CS			_P6		// dds chip select output; active low
-#define	DATA_H_CMD_L	_P21		// display control
-#define	PERIPH_RST		_P22		// peripheral reset; active low
-#define	DDS_RST			_P23		// dds reset; active high
- */
-
-
 //---------------------------< P O R T   P I N   T E S T I N G >----------------------------------------------
 //
 // TODO: move and rename the por testing defines into Systronix_utilities.h?
@@ -110,19 +95,6 @@ enum {
 
 #define RST_P			1		// NOT pin numbers; these are used by fw_reset() in utilities.cpp to identify a reset pin
 #define RST_E			2
-
-#define	SCL_PIN			_P19		// used for POR testing
-#define	SDA_PIN			_P18
-
-#define	SCL1_PIN		_P29		// used for POR testing
-#define	SDA1_PIN		_P30
-
-#define	FAIL_HIGH		0xF7	// these are used for POR testing results
-#define	FAIL_LOW		0xF3
-
-
-
-
 
 
 #endif	// Systronix_common_H_

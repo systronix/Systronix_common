@@ -1,13 +1,13 @@
 // a handful of things that are handy but don't have a particularly better place to live
 
-#include <Systronix_utilities.h>				// own .h so don't #included it through Systronix_common.h 
+#include <Systronix_utilities.h>				// own .h so don't #include it through Systronix_common.h
 //#include <Systronix_TMP102.h>
 //#include <Systronix_LCM300.h>
 //#include <SALT_JX.h>
 //#include <SALT_FETs.h>
 //#include <SALT_power_FRU.h>
 
-//#include <Systronix_ili9341_helper.h>			// experiment 
+//#include <Systronix_ili9341_helper.h>			// experiment
 
 // Systronix_ili9341_helper display;
 
@@ -98,28 +98,30 @@ uint8_t Systronix_utilities::i2c_port_pins_test (uint8_t port)
 
 	if (0 == port)
 		{
-		scl_pin = SCL_PIN;
-		sda_pin = SDA_PIN;
+		scl_pin = I2C_SCL_PIN;
+		sda_pin = I2C_SDA_PIN;
 		}
 	else
 		{
-		scl_pin = SCL1_PIN;
-		sda_pin = SDA1_PIN;
+		scl_pin = I2C_SCL1_PIN;
+		sda_pin = I2C_SDA1_PIN;
 		}
 
 	pinMode(scl_pin, INPUT);				// set SCL to be an input
 	if (!digitalRead (scl_pin))				// read it; should be high because of external pullup
 		{
-		ret_val = TEST_SCL;
-		Serial.printf ("\r\nport %d: SCL pin low", port);	// if not, say so
+		ret_val = TEST_I2C_SCL;
+		Serial.printf ("\nI2C SCL%d pin (P%d) low", port, I2C_SCL_PIN);	// if not, say so
+//		Serial.printf ("\nport %d: SCL pin low", port);	// if not, say so
 		}
 
 	pinMode(scl_pin, OUTPUT);				// set SCL to be an output
 	digitalWrite (scl_pin, LOW);			// set SCL low; do this pin before SDA to avoid start/stop conditions
 	if (digitalRead (scl_pin))				// read it; should be low
 		{
-		ret_val = TEST_SCL | TEST_SCL_HL;
-		Serial.printf ("\r\nport %d: SCL pin high", port);
+		ret_val = TEST_I2C_SCL | TEST_I2C_SCL_HL;
+		Serial.printf ("\nI2C SCL%d pin (P%d) high", port, I2C_SCL_PIN);
+//		Serial.printf ("\nport %d: SCL pin high", port);
 		}
 
 	for (uint8_t i=0; i<10; i++)			// send a bunch of clocks in case an i2c operation was interrupted by a reset
@@ -131,19 +133,20 @@ uint8_t Systronix_utilities::i2c_port_pins_test (uint8_t port)
 	pinMode(sda_pin, INPUT);				// set SDA to be an input
 	if (!digitalRead (sda_pin))				// read it; should be high because of external pullup
 		{
-		ret_val = TEST_SDA;
-		Serial.printf ("\r\nport %d: SDA pin low", port);	// if not, say so
+		ret_val = TEST_I2C_SDA;
+		Serial.printf ("\nI2C SDA%d pin (P%d) low", port, I2C_SDA_PIN);	// if not, say so
+//		Serial.printf ("\r\nport : I2C SDA%d pin low", port);
 		}
 
 	pinMode(sda_pin, OUTPUT);				// set SDA to be an output
 	digitalWrite (sda_pin, LOW);			// set SDA low
 	if (digitalRead (sda_pin))				// read it; should be low
 		{
-		ret_val = TEST_SDA | TEST_SDA_HL;
-		Serial.printf ("\r\nport %d: SCL pin high", port);
+		ret_val = TEST_I2C_SDA | TEST_I2C_SDA_HL;
+		Serial.printf ("\nI2C SDA%d pin (P%d) high", port, I2C_SDA_PIN);
 		}
 
-	digitalWrite (sda_pin, HIGH);			// this order to avoid a stop condition
+	digitalWrite (sda_pin, HIGH);			// this in order to avoid a stop condition
 	delayMicroseconds(5);
 	digitalWrite (scl_pin, HIGH);
 
@@ -151,7 +154,7 @@ uint8_t Systronix_utilities::i2c_port_pins_test (uint8_t port)
 	pinMode(sda_pin, INPUT);				// set SDA to be an input
 
 	return ret_val;
-	} 
+	}
 
 
 //---------------------------< S P I _ P O R T _ P I N S _ T E S T >------------------------------------------
@@ -160,7 +163,7 @@ uint8_t Systronix_utilities::i2c_port_pins_test (uint8_t port)
 // TODO: log failure to uSD card (might not be possible) / fram.  This isn't a fatal error but does mean that
 // SALT may not be able to access ethernet, uSD, debug display, or flash.  If a chip select is stuck low,
 // spi is dead.  If any of miso, mosi, or sck is stuck high or low, spi is dead.  spi does not control any
-// environmental hardware so a failure of spi should not harm any animals.  Could log to fram but that log is 
+// environmental hardware so a failure of spi should not harm any animals.  Could log to fram but that log is
 // transient so the event will eventually be overwritten.
 //
 
@@ -170,83 +173,83 @@ uint8_t Systronix_utilities::spi_port_pins_test (void)
 	uint8_t result;
 	spi_port_pins_result = 0;
 
-	result = spi_pin_mobility_test (FLASH_CS_PIN);		// test the flash chip select pin
+	result = spi_pin_mobility_test (SPI_CS1_PIN);		// test the flash chip select pin
 	if (result)
 		{
-		spi_port_pins_result |= TEST_FLASH_CS | (FAIL_LOW == result) ? 0 : TEST_FLASH_CS_HL;
-		Serial.print ("FLASH_CS pin ");
-		Serial.println (FAIL_LOW == result ? "low" : "high");
+		spi_port_pins_result |= TEST_SPI_CS1 | (FAIL_LOW == result) ? 0 : TEST_SPI_CS1_HL;
+		Serial.printf ("SPI CS1 pin (P%d) %s\n", SPI_CS1_PIN, FAIL_LOW == result ? "low" : "high");
+//		Serial.printf ("%s\n", FAIL_LOW == result ? "low" : "high");
 		}
 
-	result = spi_pin_mobility_test (T_CS_PIN);		// test the touch panel chip select pin
+	result = spi_pin_mobility_test (SPI_CS2_PIN);		// test the touch panel chip select pin
 	if (result)
 		{
-		spi_port_pins_result |= TEST_T_CS | (FAIL_LOW == result) ? 0 : TEST_T_CS_HL;
-		Serial.print ("T_CS pin ");
-		Serial.println (FAIL_LOW == result ? "low" : "high");
+		spi_port_pins_result |= TEST_SPI_CS2 | (FAIL_LOW == result) ? 0 : TEST_SPI_CS2_HL;
+		Serial.printf ("SPI CS2 pin (P%d) %s\n", SPI_CS2_PIN, FAIL_LOW == result ? "low" : "high");
+//		Serial.printf ("%s\n", FAIL_LOW == result ? "low" : "high");
 		}
 
-	result = spi_pin_mobility_test (ETH_CS_PIN);		// test the ethernet chip select pin
+	result = spi_pin_mobility_test (SPI_CS3_PIN);		// test the ethernet chip select pin
 	if (result)
 		{
-		spi_port_pins_result |= TEST_ETH_CS | (FAIL_LOW == result) ? 0 : TEST_ETH_CS_HL;
-		Serial.print ("ETH_CS pin ");
-		Serial.println (FAIL_LOW == result ? "low" : "high");
+		spi_port_pins_result |= TEST_SPI_CS3 | (FAIL_LOW == result) ? 0 : TEST_SPI_CS3_HL;
+		Serial.printf ("SPI CS3 pin (P%d) %s\n", SPI_CS3_PIN, FAIL_LOW == result ? "low" : "high");
+//		Serial.printf ("%s\n", FAIL_LOW == result ? "low" : "high");
 		}
 
-	result = spi_pin_mobility_test (uSD_CS_PIN);		// test the uSD card chip select pin
+	result = spi_pin_mobility_test (SPI_CS4_PIN);		// test the uSD card chip select pin
 	if (result)
 		{
-		spi_port_pins_result |= TEST_uSD_CS | (FAIL_LOW == result) ? 0 : TEST_uSD_CS_HL;
-		Serial.print ("uSD_CS pin ");
-		Serial.println (FAIL_LOW == result ? "low" : "high");
+		spi_port_pins_result |= TEST_SPI_CS4 | (FAIL_LOW == result) ? 0 : TEST_SPI_CS4_HL;
+		Serial.printf ("SPI CS4 pin (P%d) %s\n", SPI_CS4_PIN, FAIL_LOW == result ? "low" : "high");
+//		Serial.printf ("%s\n", FAIL_LOW == result ? "low" : "high");
 		}
 
-	result = spi_pin_mobility_test (DISP_CS_PIN);		// test the debug display chip select pin
+	result = spi_pin_mobility_test (SPI_CS5_PIN);		// test the debug display chip select pin
 	if (result)
 		{
-		spi_port_pins_result |= TEST_DISP_CS | (FAIL_LOW == result) ? 0 : TEST_DISP_CS_HL;
-		Serial.print ("DISP_CS pin ");
-		Serial.println (FAIL_LOW == result ? "low" : "high");
+		spi_port_pins_result |= TEST_SPI_CS5 | (FAIL_LOW == result) ? 0 : TEST_SPI_CS5_HL;
+		Serial.printf ("SPI CS5 pin (P%d) %s\n", SPI_CS5_PIN, FAIL_LOW == result ? "low" : "high");
+//		Serial.printf ("%s\n", FAIL_LOW == result ? "low" : "high");
 		}
 
-	result = spi_pin_mobility_test (MOSI_PIN);			// test the MOSI pin
+	result = spi_pin_mobility_test (SPI_MOSI_PIN);			// test the MOSI pin
 	if (result)
 		{
-		spi_port_pins_result |= TEST_MOSI | (FAIL_LOW == result) ? 0 : TEST_MOSI_HL;
-		Serial.print ("MOSI pin ");
-		Serial.println (FAIL_LOW == result ? "low" : "high");
+		spi_port_pins_result |= TEST_SPI_MOSI | (FAIL_LOW == result) ? 0 : TEST_SPI_MOSI_HL;
+		Serial.printf ("SPI MOSI pin (P%d) %s\n", SPI_MOSI_PIN, FAIL_LOW == result ? "low" : "high");
+//		Serial.println (FAIL_LOW == result ? "low" : "high");
 		}
 
-	result = spi_pin_mobility_test (MISO_PIN);			// test the MISO pin
+	result = spi_pin_mobility_test (SPI_MISO_PIN);			// test the MISO pin
 	if (result)
 		{
-		spi_port_pins_result |= TEST_MISO | (FAIL_LOW == result) ? 0 : TEST_MISO_HL;
-		Serial.print ("MISO pin ");
-		Serial.println (FAIL_LOW == result? "low" : "high");
+		spi_port_pins_result |= TEST_SPI_MISO | (FAIL_LOW == result) ? 0 : TEST_SPI_MISO_HL;
+		Serial.printf ("SPI MISO pin (P%d) %s\n", SPI_MISO_PIN, FAIL_LOW == result ? "low" : "high");
+//		Serial.println (FAIL_LOW == result? "low" : "high");
 		}
 
 											// this pin has the Teensy LED on it; in pullup mode, LED pulls the line
 											// down to about 1.7V; not enough for a HIGH so it must be driven HIGH
-	pinMode(SCK_PIN, OUTPUT);				// set the pin to be an output
-	digitalWrite (SCK_PIN, HIGH);			// drive the pin high
-	if (!digitalRead (SCK_PIN))				// read it; should be high
+	pinMode(SPI_SCK_PIN, OUTPUT);				// set the pin to be an output
+	digitalWrite (SPI_SCK_PIN, HIGH);			// drive the pin high
+	if (!digitalRead (SPI_SCK_PIN))				// read it; should be high
 		{
 		ret_val = FAIL_LOW;
-		spi_port_pins_result |= TEST_SCK;
-		Serial.println ("SCK pin low");		// if not, say so
+		spi_port_pins_result |= TEST_SPI_SCK;
+		Serial.printf ("SPI_SCK pin (P%d) low", SPI_SCK_PIN);		// if not, say so
 		}
-	digitalWrite (SCK_PIN, LOW);			// set the pin low
-	if (digitalRead (SCK_PIN))				// read it; should be low
+	digitalWrite (SPI_SCK_PIN, LOW);			// set the pin low
+	if (digitalRead (SPI_SCK_PIN))				// read it; should be low
 		{
 		ret_val = FAIL_HIGH;
-		spi_port_pins_result |= TEST_SCK | TEST_SCK_HL;
-		Serial.println ("SCK pin high");
+		spi_port_pins_result |= TEST_SPI_SCK | TEST_SPI_SCK_HL;
+		Serial.printf ("SPI_SCK pin (P%d) high", SPI_SCK_PIN);
 		}
-	pinMode (SCK_PIN, INPUT);				// leave the pin in input mode (LED off)
+	pinMode (SPI_SCK_PIN, INPUT);				// leave the pin in input mode (LED off)
 
 	return ret_val;
-	} 
+	}
 
 
 //---------------------------< F R A M _ F I L L >------------------------------------------------------------
@@ -295,7 +298,7 @@ uint8_t Systronix_utilities::fram_fill (uint8_t c, uint16_t address, size_t n)
 // aircr to a non-zero value.  Similarly, SW_RESET_KEY_2 must be correct or the function will abort and set
 // aircr to a non-zero value.  To recover, aircr must be set to zero externally.
 //
-/* 
+/*
 void Systronix_utilities::software_reset_b (uint32_t key_2)
 	{
 	if ((SW_RESET_KEY_A != (aircr & SW_RESET_KEY_A)) ||		// must be 0x05000000
@@ -323,7 +326,7 @@ void Systronix_utilities::software_reset_b (uint32_t key_2)
 // function is called; any other value will cause the function to abort and set aircr to a non-zero value.  To
 // recover, aircr must be set to zero externally.
 //
-/* 
+/*
 void Systronix_utilities::software_reset_1 (uint32_t key_A)
 	{
 	if (aircr)											// must be zero on entry
@@ -345,7 +348,7 @@ void Systronix_utilities::software_reset_1 (uint32_t key_A)
 // of the call.  For now, only the big five: POR, reset pin, watchdog, low voltage, and software are supported.
 // Returns 'unknown' for any other reset source.
 //
-// source_text_ptr is the address of a pointer in the calling source so it is a pointer to a pointer. 
+// source_text_ptr is the address of a pointer in the calling source so it is a pointer to a pointer.
 //
 // This function maintains a count of certain reset types in fram: external, watchdog, and other (power on,
 // low voltage, and the unknown or undefined.
@@ -360,7 +363,7 @@ void Systronix_utilities::software_reset_1 (uint32_t key_A)
 //	lockup - ARM core lockup
 //	JTAG - SALT does not use JTAG
 //
-/* 
+/*
 void Systronix_utilities::get_reset_source_text (const char** source_text_ptr, uint16_t* count_ptr)
 	{
 	uint16_t	reset_counter_addr;						// fram reset counter address
@@ -453,7 +456,7 @@ boolean Systronix_utilities::get_user_yes_no (char* prompt, char* query, boolean
 // fram size so that this internal address counter wraps to zero.  Setting the size of n is the obligation of
 // the calling function.
 //
-/* 
+/*
 void Systronix_utilities::fram_get_n_bytes (uint8_t* buf_ptr, size_t n)
 	{
 	size_t i;
@@ -510,7 +513,7 @@ void Systronix_utilities::hex_dump_core (uint16_t address, uint8_t* data_ptr)
 // Dumps 256 byte 'pages' of fram to the monitor. Used by the ini loaders but can be added as a debug function
 // when necessary.
 //
-/* 
+/*
 void Systronix_utilities::fram_hex_dump (uint16_t start_address)
 	{
 	uint8_t		buf [256];
@@ -686,7 +689,7 @@ void Systronix_utilities::task_time_fastfwd (e_timer *et_ptr, uint32_t min_task_
 	{
 	uint32_t et = et_ptr->elapsed_time;		// get current value in case it increments while we are testing it
 
-	if (min_task_time > et_ptr->interval) 
+	if (min_task_time > et_ptr->interval)
 		{
 		min_task_time = et_ptr->interval;
 		}
@@ -979,7 +982,7 @@ void Systronix_utilities::fatal_error_restart ()
 /*
 void Systronix_utilities::ui_display_update (uint8_t habitat)
 	{
-//	static char last_display [33];		// experiment 
+//	static char last_display [33];		// experiment
 
 	if (HABITAT_A == habitat)
 		{
